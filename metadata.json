@@ -1,0 +1,6 @@
+{
+  "name": "ODP Coverage App",
+  "description": "A web application to check Optical Distribution Point (ODP) coverage with role-based access for admins, superadmins, and VIPs.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
