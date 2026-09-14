@@ -1,12 +1,18 @@
+import 'dotenv/config';
 import express from "express";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecret123";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("JWT_SECRET tidak diatur. Tambahkan JWT_SECRET=<string acak kuat> pada file .env sebelum menjalankan aplikasi.");
+  process.exit(1);
+}
 
 // Storage setup
 const DATA_DIR = path.join(process.cwd(), 'data');
@@ -95,11 +101,15 @@ try {
 }
 
 const app = express();
-const PORT = 3000;
+const PORT = 3006;
 
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(cookieParser());
+app.use(helmet({
+  contentSecurityPolicy: false, // Vite and React Router sometimes require broader CSP or custom tuning, better disable default to avoid breaking UI 
+  crossOriginEmbedderPolicy: false // Prevent breaking leaflet tile loading
+}));
 
 // Middleware for checking auth
 const authMiddleware = (req, res, next) => {
@@ -131,11 +141,19 @@ app.post("/api/login", (req, res) => {
   if (!valid) return res.status(401).json({ error: "Invalid credentials" });
 
   const token = jwt.sign({ id: user.id, username: user.username, name: user.name, role: user.role }, JWT_SECRET, { expiresIn: "1d" });
-  res.cookie("token", token, { httpOnly: true }).json({ success: true, user: { id: user.id, username: user.username, name: user.name, role: user.role } });
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  }).json({ success: true, user: { id: user.id, username: user.username, name: user.name, role: user.role } });
 });
 
 app.post("/api/logout", (req, res) => {
-  res.clearCookie("token").json({ success: true });
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+  }).json({ success: true });
 });
 
 app.get("/api/me", authMiddleware, (req, res) => {
@@ -238,7 +256,7 @@ app.put("/api/odps/:id", authMiddleware, roleMiddleware(["superadmin", "vip"]), 
   res.json(odp);
 });
 
-app.post("/api/check-coverage", authMiddleware, (req, res) => {
+app.post("/api/check-coverage", (req, res) => {
   const { lat, lng } = req.body;
   if (typeof lat !== 'number' || typeof lng !== 'number') {
     return res.status(400).json({ error: 'Latitude dan longitude wajib berupa angka.' });

@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Settings from './pages/Settings';
 import ExportImport from './pages/ExportImport';
+import PublicCoverage from './pages/PublicCoverage';
 
 const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
   const { user, loading } = useAuth();
@@ -35,7 +36,7 @@ export default function App() {
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to="/app" replace />} />
+          <Route path="/" element={<PublicCoverage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
             <Route index element={<MapPage />} />
@@ -44,7 +45,7 @@ export default function App() {
             <Route path="settings" element={<ProtectedRoute allowedRoles={['vip']}><Settings /></ProtectedRoute>} />
             <Route path="export-import" element={<ProtectedRoute allowedRoles={['vip']}><ExportImport /></ProtectedRoute>} />
           </Route>
-          <Route path="*" element={<Navigate to="/app" replace />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

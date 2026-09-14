@@ -79,7 +79,7 @@ export default function Layout() {
                 <span className="text-2xl font-bold text-blue-600 dark:text-blue-300">O</span>
               </div>
             )}
-            <h1 className="text-xl font-bold whitespace-nowrap">GECoverage</h1>
+            {/* Title removed, logo only */}
           </div>
           <button onClick={() => setIsSidebarOpen(false)} className="absolute top-4 right-4 md:hidden p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
             <X className="w-5 h-5" />
@@ -133,13 +133,12 @@ export default function Layout() {
               isSidebarOpen ? "opacity-0 md:hidden" : "opacity-100"
             )}>
               {settings?.logo ? (
-                <img src={settings.logo} alt="Logo" className="h-8 w-8 object-contain" />
+                <img src={settings.logo} alt="Logo" className="h-8 w-auto object-contain max-w-[120px]" />
               ) : (
                 <div className="h-8 w-8 bg-blue-100 dark:bg-blue-900 rounded-md flex items-center justify-center">
                   <span className="font-bold text-blue-600 dark:text-blue-300">O</span>
                 </div>
               )}
-              <h1 className="text-xl font-bold truncate">GECoverage</h1>
             </div>
           </div>
         </header>
